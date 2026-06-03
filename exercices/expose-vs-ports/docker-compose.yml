@@ -1,0 +1,17 @@
+services:
+  api:
+    build: .
+    ports:
+      - "3002:3000"
+    environment:
+      DB_HOST: database
+      DB_PASSWORD: secret
+    depends_on:
+      - database
+
+  database:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_PASSWORD: secret
+      POSTGRES_DB: testdb
+    # Pas de ports ! Seulement accessible via le network interne
