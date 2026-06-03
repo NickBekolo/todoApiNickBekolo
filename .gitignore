@@ -1,3 +1,6 @@
 node_modules
-.DS_Store
 .env
+image.png
+*.pdf
+.DS_Store
+image-1.png
