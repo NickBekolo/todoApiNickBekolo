@@ -1,101 +1,144 @@
-# Todo API - Nick Bekolo
 
-## Description
+# Todo API - Node.js + PostgreSQL + Docker
 
-Todo API est une API REST développée avec Node.js et Express permettant de gérer une liste de tâches (Todo List).
+## 📌 Description
 
-Le projet a été réalisé dans le cadre du cours DevOps afin de mettre en pratique :
+API REST de gestion de tâches (Todo List) développée avec :
 
-* Le développement d'une API REST
-* La conteneurisation avec Docker
-* L'utilisation de Git et GitHub
-* Les bonnes pratiques de préparation à la CI/CD
+- Node.js
+- Express.js
+- PostgreSQL
+- Sequelize (ORM)
+- Docker & Docker Compose
+
+Ce projet a été réalisé dans un contexte DevOps afin de mettre en pratique :
+
+- Création d'une API REST
+- Conteneurisation avec Docker
+- Orchestration multi-services avec Docker Compose
+- Utilisation d’une base de données PostgreSQL
+- Préparation CI/CD
 
 ---
 
-## Fonctionnalités
+## 🚀 Architecture du projet
 
-### CRUD des tâches
+```
 
-L'API permet :
+todoApiNickBekolo/
+├── src/
+│   ├── routes/
+│   │   └── tasks.js
+│   ├── models/
+│   │   └── task.js
+│   ├── middleware/
+│   │   └── errorHandler.js
+│   ├── database.js
+│   └── app.js
+├── Dockerfile
+├── docker-compose.yml
+├── .dockerignore
+├── .gitignore
+├── package.json
+├── package-lock.json
+└── README.md
 
-* Créer une tâche
-* Lister toutes les tâches
-* Consulter une tâche
-* Modifier une tâche
-* Supprimer une tâche
+````
 
-### Structure d'une tâche
+---
+
+## ⚙️ Technologies utilisées
+
+- Node.js 18
+- Express.js
+- PostgreSQL 17
+- Sequelize ORM
+- Docker
+- Docker Compose
+
+---
+
+## 🧱 Modèle de données (Task)
 
 ```json
 {
-  "id": "uuid",
-  "description": "Faire les exercices Docker",
-  "state": "todo"
+  "id": 1,
+  "title": "string",
+  "description": "string",
+  "status": "todo | done",
+  "createdAt": "timestamp",
+  "updatedAt": "timestamp"
 }
-```
+````
 
 ---
 
-## Technologies utilisées
+## 🐳 Lancer le projet avec Docker (RECOMMANDÉ)
 
-* Node.js
-* Express.js
-* Docker
-* Git / GitHub
-
----
-
-## Installation
-
-### Cloner le projet
+### 1. Build et démarrage
 
 ```bash
-git clone https://github.com/NickBekolo/todoApiNickBekolo.git
-cd todoApiNickBekolo
+docker compose up --build
 ```
 
-### Installer les dépendances
+### 2. Vérifier les conteneurs
+
+```bash
+docker ps
+```
+
+Vous devez voir :
+
+* todo-api
+* postgres
+
+### 3. Stopper les conteneurs
+
+```bash
+docker compose down
+```
+
+---
+
+## 💻 Lancer le projet en local (sans Docker)
+
+### 1. Installer les dépendances
 
 ```bash
 npm install
 ```
 
----
+### 2. Créer le fichier `.env`
 
-## Lancement en local
+```env
+PORT=8080
+
+DB_HOST=localhost
+DB_PORT=5432
+DB_NAME=todo_db
+DB_USER=postgres
+DB_PASSWORD=postgres
+```
+
+### 3. Lancer PostgreSQL localement
+
+Via Docker ou installation locale.
+
+### 4. Démarrer l’API
 
 ```bash
 npm start
 ```
 
-L'API est disponible sur :
-
-```text
-http://localhost:8080
-```
-
 ---
 
-## Vérification de l'état du serveur
+## 🌐 API Endpoints
 
-### Health Check
+### Health check
 
 ```http
 GET /health
 ```
-
-Exemple de réponse :
-
-```json
-{
-  "status": "UP"
-}
-```
-
----
-
-## Endpoints API
 
 ### Créer une tâche
 
@@ -103,24 +146,11 @@ Exemple de réponse :
 POST /tasks
 ```
 
-Body :
-
-```json
-{
-  "description": "Apprendre Docker",
-  "state": "todo"
-}
-```
-
----
-
-### Récupérer toutes les tâches
+### Lister les tâches
 
 ```http
 GET /tasks
 ```
-
----
 
 ### Récupérer une tâche
 
@@ -128,24 +158,11 @@ GET /tasks
 GET /tasks/:id
 ```
 
----
-
 ### Modifier une tâche
 
 ```http
 PUT /tasks/:id
 ```
-
-Body :
-
-```json
-{
-  "description": "Apprendre Docker et CI/CD",
-  "state": "done"
-}
-```
-
----
 
 ### Supprimer une tâche
 
@@ -155,88 +172,96 @@ DELETE /tasks/:id
 
 ---
 
-## Docker
+## 🧪 Tests API (curl)
 
-### Construire l'image
+### Créer une tâche
+
+```bash
+curl -X POST http://localhost:8080/tasks \
+-H "Content-Type: application/json" \
+-d '{"title":"Test Docker","description":"API test","status":"todo"}'
+```
+
+### Lister les tâches
+
+```bash
+curl http://localhost:8080/tasks
+```
+
+### Récupérer une tâche
+
+```bash
+curl http://localhost:8080/tasks/1
+```
+
+### Modifier une tâche
+
+```bash
+curl -X PUT http://localhost:8080/tasks/1 \
+-H "Content-Type: application/json" \
+-d '{"status":"done"}'
+```
+
+### Supprimer une tâche
+
+```bash
+curl -X DELETE http://localhost:8080/tasks/1
+```
+
+---
+
+## 🐘 Base de données PostgreSQL
+
+### Accéder au conteneur
+
+```bash
+docker exec -it postgres psql -U postgres -d todo_db
+```
+
+### Lister les tables
+
+```sql
+\dt
+```
+
+### Voir les données
+
+```sql
+SELECT * FROM "Tasks";
+```
+
+---
+
+## 🐳 Docker Compose services
+
+* API : port `8080`
+* PostgreSQL : port `5432`
+* Base : `todo_db`
+
+---
+
+## 📦 Build image Docker
 
 ```bash
 docker build -t todo-api .
 ```
 
-### Lancer le conteneur
+---
 
-```bash
-docker run -p 8080:8080 todo-api
-```
+## 🔥 Points forts
 
-### Vérifier les conteneurs actifs
-
-```bash
-docker ps
-```
-
-### Arrêter un conteneur
-
-```bash
-docker stop NOM_DU_CONTENEUR
-```
+* API REST complète (CRUD)
+* PostgreSQL persistant
+* Architecture propre
+* Docker + Docker Compose
+* Prêt pour CI/CD
 
 ---
 
-## Docker Compose
-
-### Démarrer les services
-
-```bash
-docker compose up --build
-```
-
-### Arrêter les services
-
-```bash
-docker compose down
-```
-
----
-
-## Structure du projet
-
-```text
-todoApiNickBekolo/
-├── src/
-│   ├── routes/
-│   │   └── tasks.js
-│   ├── models/
-│   │   └── task.js
-│   ├── middleware/
-│   │   └── errorHandler.js
-│   └── app.js
-├── Dockerfile
-├── docker-compose.yml
-├── package.json
-├── package-lock.json
-├── .gitignore
-└── README.md
-```
-
----
-
-## Gestion de projet
-
-Projet réalisé en mode Agile/Kanban.
-
-### Backlog initial
-
-* Création de l'API Node.js
-* Création du CRUD des tâches
-* Dockerisation du projet
-* Documentation du projet
-* Préparation à la CI/CD
-
----
-
-## Auteur
+## 👨‍💻 Auteur
 
 Nick Bekolo
+GitHub : [https://github.com/NickBekolo](https://github.com/NickBekolo)
 
-GitHub : https://github.com/NickBekolo
+
+
