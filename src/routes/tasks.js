@@ -1,64 +1,63 @@
 const express = require("express");
 const { v4: uuidv4 } = require("uuid");
+const Task = require("../models/task");
 
 const router = express.Router();
 
 const tasks = [];
 
 // CREATE
-router.post("/", (req, res) => {
-  const task = {
-    id: uuidv4(),
-    description: req.body.description,
-    state: req.body.state || "todo"
-  };
-
-  tasks.push(task);
+router.post("/", async (req, res) => {
+  const task = await Task.create(req.body);
 
   res.status(201).json(task);
 });
 
 // READ ALL
-router.get("/", (req, res) => {
+router.get("/", async (req, res) => {
+  const tasks = await Task.findAll();
+
   res.json(tasks);
 });
-
 // READ ONE
-router.get("/:id", (req, res) => {
-  const task = tasks.find(t => t.id === req.params.id);
+router.get("/:id", async (req, res) => {
+  const task = await Task.findByPk(req.params.id);
 
   if (!task) {
-    return res.status(404).json({ message: "Task not found" });
+    return res.status(404).json({
+      message: "Task not found",
+    });
   }
 
   res.json(task);
 });
 
 // UPDATE
-router.put("/:id", (req, res) => {
-  const task = tasks.find(t => t.id === req.params.id);
+router.put("/:id", async (req, res) => {
+  const task = await Task.findByPk(req.params.id);
 
   if (!task) {
-    return res.status(404).json({ message: "Task not found" });
+    return res.status(404).json({
+      message: "Task not found",
+    });
   }
 
-  task.description = req.body.description ?? task.description;
-  task.state = req.body.state ?? task.state;
+  await task.update(req.body);
 
   res.json(task);
 });
 
 // DELETE
-router.delete("/:id", (req, res) => {
-  const index = tasks.findIndex(t => t.id === req.params.id);
+router.delete("/:id", async (req, res) => {
+  const task = await Task.findByPk(req.params.id);
 
-  if (index === -1) {
-    return res.status(404).json({ message: "Task not found" });
+  if (!task) {
+    return res.status(404).json({
+      message: "Task not found",
+    });
   }
 
-  tasks.splice(index, 1);
+  await task.destroy();
 
   res.status(204).send();
 });
-
-module.exports = router;

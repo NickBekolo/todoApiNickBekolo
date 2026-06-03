@@ -1,3 +1,21 @@
-const tasks = [];
+const { DataTypes } = require("sequelize");
+const sequelize = require("../database");
 
-module.exports = tasks;
+const Task = sequelize.define("Task", {
+  title: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+
+  description: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+
+  status: {
+    type: DataTypes.STRING,
+    defaultValue: "todo",
+  },
+});
+
+module.exports = Task;
