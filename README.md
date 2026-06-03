@@ -191,13 +191,13 @@ curl http://localhost:8080/tasks
 ### Récupérer une tâche
 
 ```bash
-curl http://localhost:8080/tasks/1
+curl http://localhost:8080/tasks/<TASK_ID>
 ```
 
 ### Modifier une tâche
 
 ```bash
-curl -X PUT http://localhost:8080/tasks/1 \
+curl -X PUT http://localhost:8080/tasks/<TASK_ID> \
 -H "Content-Type: application/json" \
 -d '{"status":"done"}'
 ```
@@ -205,7 +205,7 @@ curl -X PUT http://localhost:8080/tasks/1 \
 ### Supprimer une tâche
 
 ```bash
-curl -X DELETE http://localhost:8080/tasks/1
+curl -X DELETE http://localhost:8080/tasks/<TASK_ID>
 ```
 
 ---
