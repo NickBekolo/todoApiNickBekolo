@@ -1,0 +1,97 @@
+name: CI Pipeline - Todo API
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  test-unit:
+    name: Tests unitaires
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout du code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 18
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Installation des dépendances
+        run: npm ci
+
+      - name: Lancement des tests unitaires
+        run: npm test
+
+  test-integration:
+    name: Tests d'intégration (PostgreSQL)
+    runs-on: ubuntu-latest
+    needs: test-unit
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: todo_test
+          POSTGRES_USER: todo_user
+          POSTGRES_PASSWORD: todo_pass
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      DB_HOST: localhost
+      DB_PORT: 5432
+      DB_NAME: todo_test
+      DB_USER: todo_user
+      DB_PASSWORD: todo_pass
+      NODE_ENV: test
+
+    steps:
+      - name: Checkout du code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 18
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Installation des dépendances
+        run: npm ci
+
+      - name: Lancement des tests d'intégration
+        run: npm run test:integration
+
+  build-and-push:
+    name: Build et Push image DockerHub
+    runs-on: ubuntu-latest
+    needs: [test-unit, test-integration]
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout du code
+        uses: actions/checkout@v4
+
+      - name: Login DockerHub
+        run: echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USER }}" --password-stdin
+
+      - name: Build de l'image Docker
+        run: |
+          docker build \
+            -t ${{ secrets.DOCKERHUB_USER }}/todo-api:${{ github.sha }} \
+            -t ${{ secrets.DOCKERHUB_USER }}/todo-api:latest \
+            .
+
+      - name: Push sur DockerHub
+        run: |
+          docker push ${{ secrets.DOCKERHUB_USER }}/todo-api:${{ github.sha }}
+          docker push ${{ secrets.DOCKERHUB_USER }}/todo-api:latest
